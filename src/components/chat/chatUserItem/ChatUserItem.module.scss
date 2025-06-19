@@ -1,0 +1,56 @@
+@use "sass:color";
+@use "../../../styles/vars.scss" as *;
+
+.user {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	padding: 1rem 1.5rem;
+	cursor: pointer;
+	background-color: $color-content;
+	transition: background-color 0.2s ease-in-out;
+	border-bottom: 1px solid color.adjust($color-content, $lightness: 5%);
+
+	&.active {
+		background-color: color.adjust($color-content, $lightness: 8%);
+	}
+
+	.row {
+		display: flex;
+		justify-content: space-between;
+
+		img {
+			width: 50px;
+			height: 50px;
+			border-radius: 50%;
+			object-fit: cover;
+			margin-right: 1rem;
+		}
+
+		.col {
+			display: flex;
+			flex-direction: column;
+			gap: 5px;
+
+			.name {
+				font-size: 16px;
+				font-weight: 600;
+				color: $color-text-primary;
+			}
+
+			.status {
+				font-size: 14px;
+				color: $color-text-secondary;
+
+				&.online {
+					color: $color-accent;
+				}
+			}
+		}
+	}
+
+	.lastActivity {
+		font-size: 14px;
+		color: $color-text-secondary;
+	}
+}

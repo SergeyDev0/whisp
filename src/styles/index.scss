@@ -1,0 +1,38 @@
+@use 'vars' as *;
+@use 'sass:color';
+@use '../assets/fonts/fonts';
+
+html, body, #root {
+	height: 100dvh;
+	overflow: hidden;
+}
+
+*::-webkit-scrollbar {
+	width: 5px;
+	background-color: rgba(255, 0, 0, 0);
+	opacity: 0;
+}
+
+*::-webkit-scrollbar-thumb {
+	background-color: color.adjust($color-panel, $lightness: 20%);
+	border-radius: 10px;
+	opacity: 0;
+}
+
+body {
+	background-color: $color-bg;
+	color: $color-text-primary;
+}
+
+input, input::placeholder, button {
+	color: $color-text-primary;
+}
+
+#root {
+	display: flex;
+	width: 100%;
+}
+
+a {
+	color: $color-text-primary;
+}

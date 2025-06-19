@@ -1,0 +1,214 @@
+@use "../../styles/vars" as *;
+@use "sass:color";
+
+.header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  flex-shrink: 0;
+
+  .left {
+    .logo {
+      font-weight: 500;
+      font-size: 28px;
+      color: $color-text-primary;
+    }
+  }
+
+  .right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-grow: 1;
+
+    .search {
+      width: 100%;
+      height: 50px;
+      border-radius: $radius-primary;
+      background-color: $color-surface;
+      padding: 0 58px 0 58px;
+      transition: 0.2s ease-in-out;
+      visibility: hidden;
+      opacity: 0;
+      text-align: center;
+      font-size: 18px;
+      color: $color-text-primary;
+
+      &::placeholder {
+        color: $color-text-secondary;
+        font-size: 18px;
+      }
+
+      &Wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        flex-grow: 1;
+
+        &.active {
+          .search {
+            visibility: visible;
+            opacity: 1;
+
+            &Button {
+              right: 4px;
+              pointer-events: none;
+            }
+
+            &Back {
+              opacity: 1;
+              visibility: visible;
+            }
+          }
+        }
+      }
+
+      &Button {
+        position: absolute;
+        right: 0px;
+        top: 0;
+        bottom: 0;
+        margin: auto;
+        height: 50px;
+        width: 50px;
+        border-radius: 50%;
+        transition: 0.2s ease-in-out;
+
+        & > svg {
+          width: 30px;
+          height: 30px;
+        }
+      }
+
+      &Back {
+        position: absolute;
+        left: 4px;
+        top: 0;
+        bottom: 0;
+        margin: auto;
+        border-radius: 50%;
+        height: 50px;
+        width: 50px;
+        transition: 0.2s all;
+        color: $color-text-primary;
+        opacity: 0;
+        visibility: hidden;
+        z-index: 2;
+        pointer-events: all;
+
+        & > svg {
+          width: 30px;
+          height: 30px;
+        }
+      }
+    }
+
+    .account {
+      & > button {
+				position: relative;
+				height: 50px;
+        width: 50px;
+        border-radius: 50%; 	
+        background-color: $color-text-secondary;
+
+				.settingsMenu {
+					z-index: 2;
+					position: absolute;
+					display: flex;
+					flex-direction: column;
+					top: calc(100% + 10px);
+					right: 0;
+					background-color: $color-surface;
+					border-radius: $radius-primary;
+					padding: 0rem; 
+					width: 200px;
+					opacity: 0;
+					visibility: hidden;
+					transition: .2s all;
+
+					&::before {
+						content: ""; 
+						transform: rotate(180deg);
+						position: absolute;
+						bottom: 100%;
+						right: 15px;
+						border-top: 10px solid $color-surface;
+						border-left: 10px solid transparent;
+						border-right: 10px solid transparent;
+						border-bottom: 10px solid transparent;
+					}
+	
+					&.open {
+						opacity: 1;
+						visibility: visible;
+					}
+				}
+	
+				.settingsItem {
+					display: flex;
+					align-items: center;
+					gap: 1rem;
+					padding: 0.5rem 1rem;
+					white-space: nowrap;
+					flex-shrink: 0;
+					cursor: pointer;
+					transition: .2s ease-in-out;
+					color: $color-text-primary;
+	
+					&:hover { 
+						background-color: color.adjust($color-content, $lightness: 15%);
+					}
+	 
+					&:first-child {
+						border-top-left-radius: $radius-primary;
+						border-top-right-radius: $radius-primary;
+						padding-top: 1rem;
+					}
+	
+					&:last-child {
+						border-bottom-left-radius: $radius-primary;
+						border-bottom-right-radius: $radius-primary;
+						padding-bottom: 1rem;
+						color: $color-red;
+					}
+	
+					> svg {
+						flex-shrink: 0;
+						width: 20px;
+						height: 20px;
+					}
+				}
+
+        & > img {
+          display: block;
+          width: 100%;
+          height: 100%;
+          border-radius: 50%;
+          border: 1px solid $color-surface;
+          object-fit: cover;
+        }
+      }
+
+      &List {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex-shrink: 0;
+      }
+
+      &Add > button {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px dashed $color-text-secondary;
+        color: $color-text-primary;
+      }
+    }
+  }
+}
