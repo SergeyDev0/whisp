@@ -10,11 +10,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@react-input/mask": "^2.0.4",
+    "framer-motion": "^12.18.1",
     "lucide-react": "^0.517.0",
     "mobx": "^6.13.7",
     "mobx-react-lite": "^4.1.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-phone-number-input": "^3.4.12",
     "react-router-dom": "^7.6.2",
     "sass": "^1.89.2"
   },

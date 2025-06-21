@@ -1,0 +1,211 @@
+@use "../../styles/vars.scss" as *;
+@use "sass:color";
+
+.loginWrapper {
+	width: 100%;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: $color-bg;
+}
+
+.loginBox {
+  background: $color-content;
+  border-radius: $radius-primary;
+  box-shadow: 0 4px 32px rgba(0,0,0,0.25);
+  padding: 2.5rem 2rem 2rem 2rem;
+  width: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+}
+
+.setupBox {
+  background: $color-content;
+  border-radius: $radius-primary;
+  box-shadow: 0 4px 32px rgba(0,0,0,0.25);
+  padding: 2.5rem 2rem 2rem 2rem;
+  width: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.logo {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: $color-accent;
+  letter-spacing: 2px;
+}
+
+.form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.inputWrapper {
+	position: relative;
+	margin-bottom: 2rem;
+}
+
+.input {
+	height: 53px;
+  width: 100%;
+  padding: 0 0 0 1.2rem;
+  border-radius: $radius-primary;
+  border: none;
+  background: $color-panel;
+  color: $color-text-primary;
+  font-size: 1rem;
+  outline: none;
+  transition: box-shadow 0.2s;
+  box-shadow: 0 0 0 0 rgba($color-accent, 0);
+
+	> input {
+		padding: 1rem 0 1rem .5rem;
+	}
+
+  &::placeholder {
+    color: $color-text-secondary;
+    opacity: 1;
+  }
+}
+
+.button {
+  width: 100%;
+  padding: 1rem 0;
+  border-radius: $radius-primary;
+  border: none;
+  background: $color-accent;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba($color-accent, 0.15);
+	margin-bottom: 1rem;
+
+  &:hover, &:focus {
+    background: color.adjust($color-accent, $lightness: 8%);
+    color: $color-bg;
+  }
+} 
+
+.policy {
+	color: $color-text-secondary;
+	font-size: 14px;
+	font-weight: 500;
+	width: 100%;
+	line-height: 1.4;
+	text-align: center;
+}
+
+.or {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	position: relative;
+	color: $color-text-primary;
+	font-size: 16px;
+	font-weight: 500;
+	width: 100%;
+	line-height: 1;
+
+	&::before, &::after {
+		content: "";
+		display: block;
+		width: 42%;
+		height: 1px;
+		background: $color-text-primary;
+		position: absolute;
+		top: 50%;
+		transform: translateY(-50%);
+	}
+
+	&::before {
+		left: 0;
+	}
+
+	&::after {
+		right: 0;
+	}
+
+}
+
+.socials {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+}
+
+.socialButton {
+	width: 50px;
+	height: 50px;
+	border-radius: 50%;
+	color: $color-text-primary;
+	cursor: pointer;
+	border: 1px solid $color-accent;
+
+	img {
+		width: 24px;
+		height: 24px;
+		object-fit: contain;
+	}
+}
+
+.error {
+	position: absolute;
+	top: calc(100% + 2px);
+	left: 0;
+	right: 0;
+	width: 100%;
+  color: #ff4d4f;
+  font-size: 0.95rem;
+  text-align: left;
+	text-align: center;
+}
+
+.avatar {
+	display: flex;
+	justify-content: center;
+	margin-bottom: 2rem;
+
+	input {
+		visibility: hidden;
+		position: absolute;
+		top: 0;
+		left: 0;
+		opacity: 0;
+	}
+
+	label {
+		cursor: pointer;
+		width: 150px;
+		height: 150px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border-radius: 50%;
+		background-color: $color-panel;
+
+		img {
+			width: 100%;
+			height: 100%;
+			display: block;
+			object-fit: contain;
+			border-radius: 50%;
+		}
+	}
+}
+
+.title {
+	font-size: 20px;
+	text-align: center;
+	margin-bottom: 2.5rem;
+	color: $color-text-primary;
+	font-weight: 400;
+}

@@ -1,6 +1,7 @@
 import React from "react";
 import styles from "./Header.module.scss";
 import { ArrowLeft, Plus, Search, ShieldBan, BrushCleaning, LogOut } from "lucide-react";
+import { authStore } from "../../store/authStore";
 
 const Header = () => {
   const searchInputRef = React.useRef(null);
@@ -92,7 +93,13 @@ const Header = () => {
                   <ShieldBan />
                   <span>Заблокировать</span>
                 </li>
-                <li className={styles.settingsItem}>
+                <li 
+								className={styles.settingsItem} 
+								onClick={() => {
+									authStore.logOut();
+									navigate("/auth");
+								}}
+								>
                   <LogOut />
                   <span>Выйти из аккаунта</span>
                 </li>

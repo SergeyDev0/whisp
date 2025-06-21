@@ -36,3 +36,12 @@ input, input::placeholder, button {
 a {
 	color: $color-text-primary;
 }
+
+option {
+	color: #000
+}
+
+.animate {
+	width: 100%;
+	display: flex;
+}
