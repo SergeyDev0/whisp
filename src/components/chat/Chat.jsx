@@ -1,6 +1,8 @@
-import React, { useRef } from "react";
+import React, { useRef, useEffect } from "react";
 import {
   BrushCleaning,
+  Copy,
+  Edit2,
   Ellipsis,
   Paperclip,
   Send,
@@ -8,6 +10,58 @@ import {
   Trash,
 } from "lucide-react";
 import styles from "./Chat.module.scss";
+
+const SettingsMenu = ({
+  id,
+  isSettingsMenuOpen,
+  setIsSettingsMenuOpen,
+  menuPosition,
+  menuRef,
+  text,
+}) => {
+  const handleCopy = () => {
+    if (text) {
+      navigator.clipboard.writeText(text);
+      setIsSettingsMenuOpen(false);
+    }
+  };
+  return (
+    <ul
+      ref={menuRef}
+      style={{ top: menuPosition.y, left: menuPosition.x }}
+      className={
+        isSettingsMenuOpen
+          ? `${styles.settingsMenu} ${styles.open}`
+          : styles.settingsMenu
+      }
+    >
+      <li
+        className={styles.settingsItem}
+        onClick={handleCopy}
+      >
+        <Copy />
+        <span>Копировать</span>
+      </li>
+      <li
+        className={styles.settingsItem}
+        onClick={() => setIsSettingsMenuOpen(false)}
+      >
+        <Edit2 />
+        <span>Редактировать</span>
+      </li>
+      <li
+        className={styles.settingsItem}
+        onClick={() => {
+          setIsSettingsMenuOpen(false);
+          console.log(id);
+        }}
+      >
+        <Trash />
+        <span>Удалить чат</span>
+      </li>
+    </ul>
+  );
+};
 
 const Chat = ({ openChat, data }) => {
   const messages = [
@@ -50,7 +104,12 @@ const Chat = ({ openChat, data }) => {
   ];
   const [message, setMessage] = React.useState("");
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
-  const menuRef = useRef(null);
+  const [isSettingsMenuOpen, setIsSettingsMenuOpen] = React.useState(false);
+  const [menuPosition, setMenuPosition] = React.useState({ x: 0, y: 0 });
+  const menuRef = React.useRef(null);
+  const textareaRef = useRef(null);
+  const caretRef = useRef(null);
+  const [selectedMessage, setSelectedMessage] = React.useState(null);
 
   const sendMessage = (e) => {
     e.preventDefault();
@@ -58,7 +117,28 @@ const Chat = ({ openChat, data }) => {
     setMessage("");
   };
 
-  React.useEffect(() => {
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      if (e.ctrlKey || e.shiftKey) {
+        e.preventDefault();
+        const textarea = e.target;
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+
+        const newText = message.slice(0, start) + "\n" + message.slice(end);
+        setMessage(newText);
+
+        requestAnimationFrame(() => {
+          textarea.selectionStart = textarea.selectionEnd = start + 1;
+        });
+      } else {
+        e.preventDefault();
+        sendMessage(e);
+      }
+    }
+  };
+
+  useEffect(() => {
     if (!isMenuOpen) return;
     const handleClick = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
@@ -68,6 +148,23 @@ const Chat = ({ openChat, data }) => {
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
   }, [isMenuOpen]);
+
+  useEffect(() => {
+    if (caretRef.current) {
+      caretRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+  }, [message]);
+
+  useEffect(() => {
+    if (!isSettingsMenuOpen) return;
+    const handleClick = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setIsSettingsMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [isSettingsMenuOpen]);
 
   const groupedMessages = messages.reduce((groups, message, index) => {
     const prevMessage = messages[index - 1];
@@ -84,6 +181,34 @@ const Chat = ({ openChat, data }) => {
 
     return groups;
   }, []);
+
+  const handleContextMenu = (e, messageText) => {
+    e.preventDefault();
+    const menuWidth = 200;
+    const menuHeight = 150;
+    const padding = 8;
+    let x = e.clientX;
+    let y = e.clientY;
+    const winWidth = window.innerWidth;
+    const winHeight = window.innerHeight;
+    if (x + menuWidth + padding > winWidth) {
+      x = winWidth - menuWidth - padding;
+    }
+    if (y + menuHeight + padding > winHeight) {
+      y = winHeight - menuHeight - padding;
+    }
+    setSelectedMessage(messageText);
+    if (isSettingsMenuOpen) {
+      setIsSettingsMenuOpen(false);
+      setTimeout(() => {
+        setMenuPosition({ x, y });
+        setIsSettingsMenuOpen(true);
+      }, 200);
+    } else {
+      setMenuPosition({ x, y });
+      setIsSettingsMenuOpen(true);
+    }
+  };
 
   return (
     <>
@@ -111,7 +236,14 @@ const Chat = ({ openChat, data }) => {
                 type="button"
               >
                 <Ellipsis />
-                <ul className={isMenuOpen ? `${styles.settingsMenu} ${styles.open}` : styles.settingsMenu}>
+                <ul
+                  className={
+                    isMenuOpen
+                      ? `${styles.settingsMenu} ${styles.open}`
+                      : styles.settingsMenu
+                  }
+                  ref={menuRef}
+                >
                   <li className={styles.settingsItem}>
                     <BrushCleaning />
                     <span>Очистить чат</span>
@@ -130,7 +262,7 @@ const Chat = ({ openChat, data }) => {
           </>
         )}
       </div>
-      <div className={styles.body}>
+      <div className={styles.body} onContextMenu={(e) => e.preventDefault()}>
         {openChat ? (
           <div className={styles.chat}>
             <ul className={styles.messageList}>
@@ -143,10 +275,19 @@ const Chat = ({ openChat, data }) => {
                       : styles.messageWrapper
                   }
                 >
+                  <SettingsMenu
+                    id={data.id}
+                    isSettingsMenuOpen={isSettingsMenuOpen}
+                    setIsSettingsMenuOpen={setIsSettingsMenuOpen}
+                    menuPosition={menuPosition}
+                    menuRef={menuRef}
+                    text={selectedMessage}
+                  />
                   {group.length > 1 ? (
                     <div className={styles.messageGroup}>
                       {group.map((message, index) => (
                         <div
+                          onContextMenu={(e) => handleContextMenu(e, message.text)}
                           key={message.id}
                           className={`${styles.message} ${
                             index === group.length - 1 ? styles.lastInGroup : ""
@@ -160,7 +301,10 @@ const Chat = ({ openChat, data }) => {
                       ))}
                     </div>
                   ) : (
-                    <div className={`${styles.message} ${styles.lastInGroup}`}>
+                    <div 
+                      onContextMenu={(e) => handleContextMenu(e, group[0].text)}
+                      className={`${styles.message} ${styles.lastInGroup}`}
+                    >
                       <p className={styles.messageText}>{group[0].text}</p>
                       <p className={styles.messageTime}>{group[0].time}</p>
                     </div>
@@ -173,18 +317,28 @@ const Chat = ({ openChat, data }) => {
               <label htmlFor="file" className={styles.fileLabel}>
                 <Paperclip />
               </label>
-              <form className={styles.inputWrapper} onSubmit={sendMessage}>
+              <div className={styles.inputWrapper}>
                 <textarea
                   className={styles.input}
                   placeholder="Сообщение..."
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
+                  onKeyDown={handleKeyDown}
                   rows={1}
+                  ref={textareaRef}
                 />
-                <button className={styles.send} type="submit">
+                <div
+                  ref={caretRef}
+                  style={{ height: 1, visibility: "hidden" }}
+                />
+                <button
+                  className={styles.send}
+                  type="button"
+                  onClick={sendMessage}
+                >
                   <Send />
                 </button>
-              </form>
+              </div>
             </div>
           </div>
         ) : (

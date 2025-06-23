@@ -74,11 +74,13 @@
 				width: 200px;
 				opacity: 0;
 				visibility: hidden;
-				transition: .2s all;
+				transform: scale(0.95);
+				transition: opacity 0.2s, transform 0.2s;
 
 				&.open {
 					opacity: 1;
 					visibility: visible;
+					transform: scale(1);
 				}
 			}
 
@@ -371,36 +373,59 @@
 }
 
 .settingsMenu {
-  position: absolute;
-  display: flex;
-  flex-direction: column;
-  top: 100%;
-  right: 0;
-  background-color: $color-surface;
-  border-radius: $radius-primary;
-  padding: 1rem;
-  min-width: 100%;
-  opacity: 0;
-  pointer-events: none;
-  transform: translateY(-10px);
-  transition: opacity 0.2s cubic-bezier(0.4,0,0.2,1), transform 0.2s cubic-bezier(0.4,0,0.2,1);
 	z-index: 2;
+	position: absolute;
+	display: flex;
+	flex-direction: column;
+	top: calc(100% + 10px);
+	right: 0;
+	background-color: $color-surface;
+	border-radius: $radius-primary;
+	padding: 0rem; 
+	width: 200px;
+	opacity: 0;
+	visibility: hidden;
+	transform: scale(0.95);
+	transition: opacity 0.2s, transform 0.2s;
 
-	&::before {
-		content: ""; 
-		transform: rotate(180deg);
-		position: absolute;
-		bottom: 100%;
-		right: 15px;
-		border-top: 10px solid $color-surface;
-		border-left: 10px solid transparent;
-		border-right: 10px solid transparent;
-		border-bottom: 10px solid transparent;
+	&.open {
+		opacity: 1;
+		visibility: visible;
+		transform: scale(1);
+	}
+}
+
+.settingsItem {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+	padding: 0.5rem 1rem;
+	white-space: nowrap;
+	flex-shrink: 0;
+	cursor: pointer;
+	transition: .2s ease-in-out;
+	color: $color-text-primary;
+
+	&:hover { 
+		background-color: color.adjust($color-content, $lightness: 15%);
 	}
 
-  &.open {
-    opacity: 1;
-    pointer-events: auto;
-    transform: translateY(0);
-  }
+	&:first-child {
+		border-top-left-radius: $radius-primary;
+		border-top-right-radius: $radius-primary;
+		padding-top: 1rem;
+	}
+
+	&:last-child {
+		border-bottom-left-radius: $radius-primary;
+		border-bottom-right-radius: $radius-primary;
+		padding-bottom: 1rem;
+		color: $color-red;
+	}
+
+	> svg {
+		flex-shrink: 0;
+		width: 20px;
+		height: 20px;
+	}
 }
