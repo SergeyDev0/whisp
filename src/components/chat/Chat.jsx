@@ -1,6 +1,7 @@
-import React, { useRef, useEffect } from "react";
+import React, { useEffect } from "react";
 import {
   BrushCleaning,
+  Check,
   Copy,
   Edit2,
   Ellipsis,
@@ -8,6 +9,7 @@ import {
   Send,
   ShieldBan,
   Trash,
+  X,
 } from "lucide-react";
 import styles from "./Chat.module.scss";
 
@@ -18,6 +20,9 @@ const SettingsMenu = ({
   menuPosition,
   menuRef,
   text,
+  messageId,
+  onEdit,
+  role,
 }) => {
   const handleCopy = () => {
     if (text) {
@@ -35,20 +40,22 @@ const SettingsMenu = ({
           : styles.settingsMenu
       }
     >
-      <li
-        className={styles.settingsItem}
-        onClick={handleCopy}
-      >
+      <li className={styles.settingsItem} onClick={handleCopy}>
         <Copy />
         <span>Копировать</span>
       </li>
-      <li
-        className={styles.settingsItem}
-        onClick={() => setIsSettingsMenuOpen(false)}
-      >
-        <Edit2 />
-        <span>Редактировать</span>
-      </li>
+      {(role === "recipient") && (
+        <li
+          className={styles.settingsItem}
+          onClick={() => {
+            setIsSettingsMenuOpen(false);
+            onEdit(messageId, text);
+          }}
+        >
+          <Edit2 />
+          <span>Редактировать</span>
+        </li>
+      )}
       <li
         className={styles.settingsItem}
         onClick={() => {
@@ -57,14 +64,14 @@ const SettingsMenu = ({
         }}
       >
         <Trash />
-        <span>Удалить чат</span>
+        <span>Удалить</span>
       </li>
     </ul>
   );
 };
 
 const Chat = ({ openChat, data }) => {
-  const messages = [
+  const [messages, setMessages] = React.useState([
     {
       id: 1,
       role: "sender",
@@ -101,20 +108,78 @@ const Chat = ({ openChat, data }) => {
       text: "very long message, very long message, very long message, very long message, very long message, very long message, very long message, very long message, very long message, very long message, very long message, very long message, very long message, very long message, very long message, very long message, very long message, very long message, very long message",
       time: "12:34",
     },
-  ];
+  ]);
   const [message, setMessage] = React.useState("");
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const [isSettingsMenuOpen, setIsSettingsMenuOpen] = React.useState(false);
   const [menuPosition, setMenuPosition] = React.useState({ x: 0, y: 0 });
-  const menuRef = React.useRef(null);
-  const textareaRef = useRef(null);
-  const caretRef = useRef(null);
   const [selectedMessage, setSelectedMessage] = React.useState(null);
+  const [selectedMessageId, setSelectedMessageId] = React.useState(null);
+  const [editingMessageId, setEditingMessageId] = React.useState(null);
+  const [textareaHeight, setTextareaHeight] = React.useState(50);
+  const textareaRef = React.useRef(null);
+  const menuRef = React.useRef(null);
+
+  useEffect(() => {
+    if (editingMessageId && textareaRef.current) {
+      textareaRef.current.focus();
+    }
+  }, [editingMessageId]);
+
+  const handleEditMessage = (id, text) => {
+    setEditingMessageId(id);
+    setMessage(text);
+    setIsSettingsMenuOpen(false);
+    setTimeout(() => {
+      if (textareaRef.current) {
+        textareaRef.current.value = text;
+        handleTextareaInput({ target: textareaRef.current });
+      }
+    }, 0);
+  };
 
   const sendMessage = (e) => {
     e.preventDefault();
-    console.log("send");
+    if (message.trim() === "") return;
+    if(editingMessageId) {
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === editingMessageId
+            ? { ...msg, text: message, role: "recipient" }
+            : msg
+        )
+      );
+      setEditingMessageId(null);
+      setMessage("");
+      setTextareaHeight(50);
+      if (textareaRef.current) {
+        textareaRef.current.value = "";
+        handleTextareaInput({ target: textareaRef.current });
+      }
+    } else {
+      setMessages((prev) => [...prev, {
+        id: prev.length + 1,
+        role: "recipient",
+        text: message,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      }]);
+      setMessage("");
+      setTextareaHeight(50);
+      if (textareaRef.current) {
+        textareaRef.current.value = "";
+        handleTextareaInput({ target: textareaRef.current });
+      }
+    }
+  };
+
+  const handleEditCancel = () => {
+    setEditingMessageId(null);
     setMessage("");
+    setTextareaHeight(50);
+    if (textareaRef.current) {
+      textareaRef.current.value = "";
+      handleTextareaInput({ target: textareaRef.current });
+    }
   };
 
   const handleKeyDown = (e) => {
@@ -150,12 +215,6 @@ const Chat = ({ openChat, data }) => {
   }, [isMenuOpen]);
 
   useEffect(() => {
-    if (caretRef.current) {
-      caretRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" });
-    }
-  }, [message]);
-
-  useEffect(() => {
     if (!isSettingsMenuOpen) return;
     const handleClick = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
@@ -182,7 +241,7 @@ const Chat = ({ openChat, data }) => {
     return groups;
   }, []);
 
-  const handleContextMenu = (e, messageText) => {
+  const handleContextMenu = (e, messageId, messageText, messageRole) => {
     e.preventDefault();
     const menuWidth = 200;
     const menuHeight = 150;
@@ -197,7 +256,8 @@ const Chat = ({ openChat, data }) => {
     if (y + menuHeight + padding > winHeight) {
       y = winHeight - menuHeight - padding;
     }
-    setSelectedMessage(messageText);
+    setSelectedMessage({ text: messageText, role: messageRole });
+    setSelectedMessageId(messageId);
     if (isSettingsMenuOpen) {
       setIsSettingsMenuOpen(false);
       setTimeout(() => {
@@ -208,6 +268,14 @@ const Chat = ({ openChat, data }) => {
       setMenuPosition({ x, y });
       setIsSettingsMenuOpen(true);
     }
+  };
+
+  const handleTextareaInput = (e) => {
+    const el = e.target;
+    el.style.height = 'auto';
+    const newHeight = Math.min(el.scrollHeight, 250);
+    el.style.height = newHeight + 'px';
+    setTextareaHeight(newHeight);
   };
 
   return (
@@ -281,13 +349,18 @@ const Chat = ({ openChat, data }) => {
                     setIsSettingsMenuOpen={setIsSettingsMenuOpen}
                     menuPosition={menuPosition}
                     menuRef={menuRef}
-                    text={selectedMessage}
+                    text={selectedMessage?.text}
+                    messageId={selectedMessageId}
+                    onEdit={handleEditMessage}
+                    role={selectedMessage?.role}
                   />
                   {group.length > 1 ? (
                     <div className={styles.messageGroup}>
                       {group.map((message, index) => (
                         <div
-                          onContextMenu={(e) => handleContextMenu(e, message.text)}
+                          onContextMenu={(e) =>
+                            handleContextMenu(e, message.id, message.text, message.role)
+                          }
                           key={message.id}
                           className={`${styles.message} ${
                             index === group.length - 1 ? styles.lastInGroup : ""
@@ -301,13 +374,15 @@ const Chat = ({ openChat, data }) => {
                       ))}
                     </div>
                   ) : (
-                    <div 
-                      onContextMenu={(e) => handleContextMenu(e, group[0].text)}
-                      className={`${styles.message} ${styles.lastInGroup}`}
+                    <div
+                      onContextMenu={(e) =>
+                        handleContextMenu(e, group[0].id, group[0].text, group[0].role)
+                      }
+                      className={`${styles.message} ${styles.lastInGroup}`} 
                     >
                       <p className={styles.messageText}>{group[0].text}</p>
                       <p className={styles.messageTime}>{group[0].time}</p>
-                    </div>
+                    </div> 
                   )}
                 </li>
               ))}
@@ -324,20 +399,35 @@ const Chat = ({ openChat, data }) => {
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   onKeyDown={handleKeyDown}
+                  onInput={handleTextareaInput}
                   rows={1}
                   ref={textareaRef}
                 />
-                <div
-                  ref={caretRef}
-                  style={{ height: 1, visibility: "hidden" }}
-                />
-                <button
-                  className={styles.send}
-                  type="button"
-                  onClick={sendMessage}
-                >
-                  <Send />
-                </button>
+                {editingMessageId ? (
+                  <div className={styles.editButtons}>
+                    <button
+                      className={styles.editButton}
+                      onClick={handleEditCancel}
+                    >
+                      <X />
+                    </button>
+                    <button
+                      type="submit"
+                      className={styles.send}
+                      onClick={sendMessage}
+                    >
+                      <Send />
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    className={styles.send}
+                    type="button"
+                    onClick={sendMessage}
+                  >
+                    <Send />
+                  </button>
+                )}
               </div>
             </div>
           </div>
